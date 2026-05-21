@@ -2,17 +2,17 @@
 
 PYTHON := python3
 PIP := pip3
-MAIN := src
+MAIN := main.py
 CONFIG := config.txt
 
 install:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) $(MAIN) $(CONFIG)
+	$(PYTHON) $(MAIN)
 
 debug:
-	$(PYTHON) -m pdb $(MAIN) $(CONFIG)
+	$(PYTHON) -m pdb $(MAIN)
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
