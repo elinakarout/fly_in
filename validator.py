@@ -82,23 +82,23 @@ class Network(BaseModel):
             )
         return self
 
-        @model_validator(mode="after")
-        def connection_validation(self) -> Self:
-            for connection in self.connections:
-                for name in connection.hubs:
-                    if not any(hub.name == name for hub in self.hubs):
-                        raise PydanticCustomError(
-                            "VallueError",
-                            f"{name} is not a hub name"
-                        )
-            seen = set()
-            for connection in self.connections:
-                a, b = connection.hubs
-                pair = tuple(sorted((a, b)))
-                if pair in seen:
+    @model_validator(mode="after")
+    def connection_validation(self) -> Self:
+        for connection in self.connections:
+            for name in connection.hubs:
+                if not any(hub.name.strip() == name.strip() for hub in self.hubs):
                     raise PydanticCustomError(
                         "ValueError",
-                        f"Duplicate connection: {a}-{b}"
+                        f"{name} is not a hub name"
                     )
-                seen.add(pair)
-            return self
+        seen = set()
+        for connection in self.connections:
+            a, b = connection.hubs
+            pair = tuple(sorted((a, b)))
+            if pair in seen:
+                raise PydanticCustomError(
+                    "ValueError",
+                    f"Duplicate connection: {a}-{b}"
+                )
+            seen.add(pair)
+        return self

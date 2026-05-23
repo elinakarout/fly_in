@@ -1,14 +1,18 @@
 from parser import set_network
 from validator import Network, Hub, Connection
 from pydantic import ValidationError
+import sys
 
 
 def main() -> None:
-    network = set_network("map.txt")
+    if len(sys.argv) != 2:
+        print("Please specify the path of the text file!")
+        return
+    network = set_network(sys.argv[1])
     print("nb_drones:", network.nb_drones)
     print("HUBS:")
     for hub in network.hubs:
-        print("name:", hub.name)
+        print(f"name: '{hub.name}'")
         print("function:", hub.function)
         print("x:", hub.coord_x)
         print("y:", hub.coord_y)
@@ -23,10 +27,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # try:
-    #     main()
-    # except ValidationError as e:
-    #     print(e.errors()[0]["msg"])
-    # except Exception as e:
-    #     print(e)
-    main()
+    try:
+        main()
+    except ValidationError as e:
+        print(e.errors()[0]["msg"])
+    except Exception as e:
+        print(e)

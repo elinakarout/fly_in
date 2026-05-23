@@ -1,3 +1,5 @@
+
+
 nb_drones: 5
 
 start_hub: hub 0 0 [color=green]

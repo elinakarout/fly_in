@@ -68,13 +68,16 @@ def create_connection(value: str) -> Connection:
 
 def set_network(file_name: str):
     file_content = (read_file(file_name))
-    if not file_content[0].startswith("nb_drones:"):
+    i = 0
+    while file_content[i].startswith("#") or not file_content[i].strip():
+        i += 1
+    if not file_content[i].startswith("nb_drones:"):
         raise ValueError("First line must start with 'nb_drones:'")
     nb_drones = 0
     hubs = []
     connections = []
     for line in file_content:
-        if not line.startswith('#'):
+        if not line.startswith('#') and line.strip():
             key = line.strip().split(":", 2)
             if key[0] == "nb_drones":
                 nb_drones = int(key[1])

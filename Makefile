@@ -4,12 +4,15 @@ PYTHON := python3
 PIP := pip3
 MAIN := main.py
 CONFIG := config.txt
+ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
 install:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) $(MAIN)
+	$(PYTHON) $(MAIN) $(ARGS)
+
+$(eval $(ARGS):;@:)
 
 debug:
 	$(PYTHON) -m pdb $(MAIN)
@@ -25,3 +28,5 @@ lint:
 lint-strict:
 	flake8 $(FILES)
 	mypy $(FILES) --strict
+
+.PHONY: install run $(ARGS) debug clean lint lint-strict
