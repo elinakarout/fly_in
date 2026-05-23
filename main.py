@@ -1,5 +1,4 @@
 from parser import set_network
-from validator import Network, Hub, Connection
 from pydantic import ValidationError
 import sys
 

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
-from typing import Literal, Self, Any
+from typing import Self
 from enum import Enum
 
 
@@ -86,7 +86,10 @@ class Network(BaseModel):
     def connection_validation(self) -> Self:
         for connection in self.connections:
             for name in connection.hubs:
-                if not any(hub.name.strip() == name.strip() for hub in self.hubs):
+                if not any(
+                    hub.name.strip() == name.strip()
+                    for hub in self.hubs
+                ):
                     raise PydanticCustomError(
                         "ValueError",
                         f"{name} is not a hub name"

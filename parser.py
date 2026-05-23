@@ -18,12 +18,16 @@ def create_hub(value: str, function: str) -> Hub:
     x = int(values[1])
     y = int(values[2])
     # print(values[3])
-    if (len(values) > 3 and values[3].startswith("[") and values[3].endswith("]")):
+    if (
+        len(values) > 3
+        and values[3].startswith("[")
+        and values[3].endswith("]")
+    ):
         metadata = {
             key: value
             for key, value in (
-            item.split("=", 1)
-            for item in values[3][1:-1].split()
+                item.split("=", 1)
+                for item in values[3][1:-1].split()
             )
         }
         zone_type = metadata.get("zone", "normal")
@@ -47,7 +51,10 @@ def create_hub(value: str, function: str) -> Hub:
 def create_connection(value: str) -> Connection:
     values = value.strip().split("-", 2)
     if (len(values) < 2):
-        raise ValueError("Connection format should be: <name1>-<name2> [metadata]!")
+        raise ValueError(
+            "Connection format should be: "
+            "<name1>-<name2> [metadata]!"
+            )
     if ('[' in values[1]):
         new_values = values[1].strip().split('[', 2)
         hubs = tuple([values[0], new_values[0]])
@@ -66,7 +73,7 @@ def create_connection(value: str) -> Connection:
         )
 
 
-def set_network(file_name: str):
+def set_network(file_name: str) -> Network:
     file_content = (read_file(file_name))
     i = 0
     while file_content[i].startswith("#") or not file_content[i].strip():
