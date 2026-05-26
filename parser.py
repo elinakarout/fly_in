@@ -1,4 +1,4 @@
-from validator import Network, Hub, Connection
+from data import Network, Hub, Connection
 
 
 def read_file(file_name: str) -> list[str]:
@@ -17,7 +17,6 @@ def create_hub(value: str, function: str) -> Hub:
     name = values[0]
     x = int(values[1])
     y = int(values[2])
-    # print(values[3])
     if (
         len(values) > 3
         and values[3].startswith("[")
@@ -57,7 +56,7 @@ def create_connection(value: str) -> Connection:
             )
     if ('[' in values[1]):
         new_values = values[1].strip().split('[', 2)
-        hubs = tuple([values[0], new_values[0]])
+        hubs = tuple([values[0].strip(), new_values[0].strip()])
         if (new_values[1].strip().endswith(']')):
             metadata = {
                 key: value
@@ -65,7 +64,7 @@ def create_connection(value: str) -> Connection:
                 }
             max_link_capacity = int(metadata["max_link_capacity"])
     else:
-        hubs = tuple([values[0], values[1]])
+        hubs = tuple([values[0].strip(), values[1].strip()])
         max_link_capacity = 1
     return Connection(
         hubs=hubs,

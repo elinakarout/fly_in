@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
-from typing import Self
+from typing import Self, Optional
+from dataclasses import dataclass, field
 from enum import Enum
 
 
