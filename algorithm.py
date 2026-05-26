@@ -9,34 +9,45 @@ class Solver:
         self.graph = self.compute_graph(network)
 
     @staticmethod
-    def compute_graph(network: Network):
+    def compute_graph(network: Network) -> dict[str, list[tuple[str, float]]]:
         names = []
         graph = {}
         for hub in network.hubs:
-            cost = 0
             if hub.zone_type == Zone_type.NORMAL:
-                cost = 1
+                cost = 1.0
             elif hub.zone_type == Zone_type.RESTRICTED:
-                cost = 2
+                cost = 2.0
             elif hub.zone_type == Zone_type.PRIORITY:
                 cost = 0.5
             else:
                 cost = float("inf")
             names.append((hub.name, cost))
-        options = []
+        options: list[tuple[str, float]] = []
         for name, _ in names:
             for connection in network.connections:
                 name1, name2 = connection.hubs
                 if name1 == name:
-                    options.extend((name, cost) for name, cost in names if name == name2)
+                    options.extend(
+                        (name, cost)
+                        for name, cost in names
+                        if name == name2
+                        )
                 elif name2 == name:
-                    options.extend((name, cost) for name, cost in names if name == name1)
+                    options.extend(
+                        (name, cost)
+                        for name, cost in names
+                        if name == name1
+                        )
             graph[name] = options
             options = []
         return graph
 
     @staticmethod
-    def get_path(came_from, start, goal):
+    def get_path(
+        came_from: dict[str, str],
+        start: str,
+        goal: str
+    ) -> list[str]:
         path = []
         current = goal
         while True:
@@ -45,17 +56,20 @@ class Solver:
                 return path[::-1]
             current = came_from[current]
 
-    def solve(self, start: str,
-            goal: str
-            ):
+    def solve(
+        self, start: str,
+        goal: str
+    ) -> list[str]:
         """dijkistra path finding algorithm"""
-        open_set = []
-        came_from = {}
+        open_set: list[tuple[float, int, str]] = []
+        came_from: dict[str, str] = {}
         closed_set = set()
-        g_score = {start: 0}
+        g_score = {start: 0.0}
         counter = 0
-        heapq.heappush(open_set, (g_score[start],
-                    counter, start))
+        heapq.heappush(
+            open_set,
+            (g_score[start], counter, start)
+        )
         counter += 1
         while open_set:
             _, _, current = heapq.heappop(open_set)
@@ -74,9 +88,9 @@ class Solver:
                     g_score[name] = tentative_g
                     heapq.heappush(open_set, (tentative_g, counter, name))
                     counter += 1
-        return ""
-    
-    def solve_map(self):
+        return self.get_path(came_from, start, goal)
+
+    def solve_map(self) -> list[str]:
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
                 start = hub.name

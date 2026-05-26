@@ -22,11 +22,11 @@ clean:
 	rm -rf .mypy_cache .pytest_cache
 
 lint:
-	flake8 .
+	flake8 . --exclude=fly_in
 	mypy .
 
 lint-strict:
-	flake8 .
+	flake8 . --exclude=fly_in
 	mypy . --strict
 
 .PHONY: install run $(ARGS) debug clean lint lint-strict

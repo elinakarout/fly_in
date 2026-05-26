@@ -1,9 +1,8 @@
 from parser import set_network
-from data import Network, Zone_type
 from algorithm import Solver
 from pydantic import ValidationError
 import sys
-from pprint import pprint
+# from pprint import pprint
 
 
 def main() -> None:
@@ -14,11 +13,12 @@ def main() -> None:
     algo = Solver(network)
     print(algo.solve_map())
 
+
 if __name__ == "__main__":
-    # try:
-    #     main()
-    # except ValidationError as e:
-    #     print(e.errors()[0]["msg"])
-    # except Exception as e:
-    #     print(e)
-    main()
+    try:
+        main()
+    except ValidationError as e:
+        print(e.errors()[0]["msg"])
+    except Exception as e:
+        print(e)
+    # main()

@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
-from typing import Self, Optional
-from dataclasses import dataclass, field
+from typing import Self
 from enum import Enum
 
 
@@ -23,7 +22,7 @@ class Hub(BaseModel):
     name: str
     coord_x: int
     coord_y: int
-    zone_type: Zone_type = Field(default="normal")
+    zone_type: Zone_type = Field(default=Zone_type.NORMAL)
     color: str = Field(default="none")
     max_drones: int = Field(default=1)
 
