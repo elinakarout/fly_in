@@ -46,8 +46,8 @@ class Algorithm:
         came_from: dict[str, str],
         start: str,
         goal: str
-    ) -> list[str]:
-        path = []
+    ) -> str:
+        path: list[str] = []
         current = goal
         if start == goal:
             return start
@@ -61,7 +61,7 @@ class Algorithm:
         self, start: str,
         goal: str,
         full_hubs: list[str]
-    ) -> list[str]:
+    ) -> str:
         """dijkistra path finding algorithm"""
         open_set: list[tuple[float, int, str]] = []
         came_from: dict[str, str] = {}
@@ -106,6 +106,7 @@ class Algorithm:
         for hub in hubs:
             if hub.name == name:
                 return hub.max_drones
+        return 1
 
     def get_full_hubs(self, start: str) -> list[str]:
         drones = self.network.drones
@@ -114,7 +115,7 @@ class Algorithm:
         for i in range(self.network.nb_drones):
             if drones[i].current_hub != start:
                 occupied.append(drones[i].current_hub)
-        counts = {}
+        counts: dict[str, int] = {}
         for hub in occupied:
             if hub in counts:
                 counts[hub] += 1
@@ -126,7 +127,7 @@ class Algorithm:
                 full_hubs.append(hub)
         return full_hubs
 
-    def run_drone(self, i: int, start: str, end: str):
+    def run_drone(self, i: int, start: str, end: str) -> None:
         drone = self.network.drones[i]
         drone.t += 1
         if drone.current_hub != end:
@@ -137,7 +138,7 @@ class Algorithm:
             drone.current_hub = next_hub
         print(f"Drone {drone.id}: {drone.current_hub}")
 
-    def solve_map(self) -> list[str]:
+    def solve_map(self) -> None:
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
                 start = hub.name

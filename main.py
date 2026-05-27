@@ -1,6 +1,6 @@
 from parser import set_network
-from algorithm import Algorithm
-from pydantic import ValidationError
+# from algorithm import Algorithm
+# from pydantic import ValidationError
 from visualisation import Drawer
 import sys
 # from pprint import pprint
@@ -15,7 +15,6 @@ def main() -> None:
     drawer.draw_map()
     # algo = Algorithm(network)
     # algo.solve_map()
-
 
 
 if __name__ == "__main__":

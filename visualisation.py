@@ -1,7 +1,6 @@
-from data import Network, Hub, Connection
+from data import Network
 import arcade
 import math
-import colorsys
 
 
 class Drawer():
@@ -36,7 +35,7 @@ class Drawer():
         else:
             extra = 4
         return (max(y) + extra, math.floor(extra / 2 + 0.5))
-    
+
     @staticmethod
     def get_cols(network: Network) -> tuple[int, int]:
         x = []
@@ -48,7 +47,7 @@ class Drawer():
             extra = 4
         return (max(x) + extra, math.floor(extra / 2 + 0.5))
 
-    def write_name(self, text, x, y, size):
+    def write_name(self, text: str, x: int, y: int, size: int) -> None:
         label = arcade.Text(
             text,
             x,
@@ -60,7 +59,7 @@ class Drawer():
         )
         label.draw()
 
-    def map_coords(self):
+    def map_coords(self) -> dict[str, tuple[int, int]]:
         coordinates = {}
         for hub in self.hubs:
             x = (hub.coord_x + self.x) * self.cell_size
@@ -68,13 +67,13 @@ class Drawer():
             coordinates[hub.name] = (x, y)
         return coordinates
 
-    def draw_grid(self):
+    def draw_grid(self) -> None:
         for x in range(0, self.width + 1, self.cell_size):
             arcade.draw_line(x, 0, x, self.height, arcade.color.GRAY)
         for y in range(0, self.height + 1, self.cell_size):
             arcade.draw_line(0, y, self.width, y, arcade.color.GRAY)
 
-    def draw_hubs(self):
+    def draw_hubs(self) -> None:
         for hub in self.hubs:
             x = (hub.coord_x + self.x) * self.cell_size
             y = (hub.coord_y + self.y) * self.cell_size
@@ -86,11 +85,11 @@ class Drawer():
                 color = getattr(arcade.color, hub.color.upper())
             radius = self.radius + (hub.max_drones * self.extra_radius)
             arcade.draw_circle_filled(
-                x , y , radius , color
+                x, y, radius, color
             )
             self.write_name(hub.name, x, y, 10)
 
-    def draw_connections(self):
+    def draw_connections(self) -> None:
         coordinates = self.map_coords()
         for connection in self.connections:
             p1 = coordinates[connection.hubs[0]]
@@ -102,7 +101,7 @@ class Drawer():
                 3
             )
 
-    def draw_drones(self, x, y):
+    def draw_drones(self, x: int, y: int) -> None:
         points = [
             (x, y + 10),
             (x + 10, y),

@@ -72,14 +72,14 @@ def create_connection(value: str) -> Connection:
         )
 
 
-def create_drones(nb_drones: int, start_hub: str):
+def create_drones(nb_drones: int, start_hub: str) -> list[Drone]:
     drones = []
     for i in range(nb_drones):
         drones.append(Drone(
-            id = i + 1,
-            t = 0,
-            current_hub = start_hub,
-            arrived = False
+            id=i+1,
+            t=0,
+            current_hub=start_hub,
+            arrived=False
         ))
     return drones
 
@@ -114,7 +114,7 @@ def set_network(file_name: str) -> Network:
     drones = create_drones(nb_drones, start_hub)
     return Network(
         nb_drones=nb_drones,
-        drones = drones,
+        drones=drones,
         hubs=hubs,
         connections=connections
         )
