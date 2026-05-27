@@ -41,8 +41,15 @@ class Connection(BaseModel):
     max_link_capacity: int = Field(default=1)
 
 
+class Drone(BaseModel):
+    id: int
+    t: int
+    current_hub: str
+
+
 class Network(BaseModel):
     nb_drones: int
+    drones: list[Drone]
     hubs: list[Hub]
     connections: list[Connection]
 
@@ -57,6 +64,7 @@ class Network(BaseModel):
         end = 0
         for hub in self.hubs:
             if hub.function == Zone_function.START:
+                hub.max_drones = self.nb_drones
                 start += 1
             if hub.function == Zone_function.END:
                 end += 1

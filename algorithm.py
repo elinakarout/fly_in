@@ -2,8 +2,7 @@ from data import Network, Zone_type, Zone_function
 import heapq
 
 
-class Solver:
-    """Class to solve the maze"""
+class Algorithm:
     def __init__(self, network: Network) -> None:
         self.network = network
         self.graph = self.compute_graph(network)
@@ -43,22 +42,25 @@ class Solver:
         return graph
 
     @staticmethod
-    def get_path(
+    def get_next_hub(
         came_from: dict[str, str],
         start: str,
         goal: str
     ) -> list[str]:
         path = []
         current = goal
+        if start == goal:
+            return start
         while True:
-            path.append(current)
             if current == start:
-                return path[::-1]
+                return path[-1]
+            path.append(current)
             current = came_from[current]
 
-    def solve(
+    def dijkistra(
         self, start: str,
-        goal: str
+        goal: str,
+        full_hubs: list[str]
     ) -> list[str]:
         """dijkistra path finding algorithm"""
         open_set: list[tuple[float, int, str]] = []
@@ -76,11 +78,13 @@ class Solver:
             if current in closed_set:
                 continue
             if current == goal:
-                return self.get_path(came_from, start, goal)
+                return self.get_next_hub(came_from, start, goal)
             closed_set.add(current)
             neighbors = self.graph[current]
             for name, cost in neighbors:
                 if name in closed_set:
+                    continue
+                if name in full_hubs:
                     continue
                 tentative_g = g_score[current] + cost
                 if tentative_g < g_score.get(name, float("inf")):
@@ -88,7 +92,50 @@ class Solver:
                     g_score[name] = tentative_g
                     heapq.heappush(open_set, (tentative_g, counter, name))
                     counter += 1
-        return self.get_path(came_from, start, goal)
+        return self.get_next_hub(came_from, start, current)
+
+    def drones_arrived(self, end: str) -> bool:
+        drones = self.network.drones
+        for i in range(self.network.nb_drones):
+            if drones[i].current_hub != end:
+                return False
+        return True
+
+    def get_max_drones(self, name: str) -> int:
+        hubs = self.network.hubs
+        for hub in hubs:
+            if hub.name == name:
+                return hub.max_drones
+
+    def get_full_hubs(self, start: str) -> list[str]:
+        drones = self.network.drones
+        occupied = []
+        full_hubs = []
+        for i in range(self.network.nb_drones):
+            if drones[i].current_hub != start:
+                occupied.append(drones[i].current_hub)
+        counts = {}
+        for hub in occupied:
+            if hub in counts:
+                counts[hub] += 1
+            else:
+                counts[hub] = 1
+        for hub, count in counts.items():
+            max_drones = self.get_max_drones(hub)
+            if count == max_drones:
+                full_hubs.append(hub)
+        return full_hubs
+
+    def run_drone(self, i: int, start: str, end: str):
+        drone = self.network.drones[i]
+        drone.t += 1
+        if drone.current_hub != end:
+            full_hubs = self.get_full_hubs(start)
+            if drone.current_hub != start:
+                full_hubs.append(start)
+            next_hub = self.dijkistra(drone.current_hub, end, full_hubs)
+            drone.current_hub = next_hub
+        print(f"Drone {drone.id}: {drone.current_hub}")
 
     def solve_map(self) -> list[str]:
         for hub in self.network.hubs:
@@ -96,4 +143,12 @@ class Solver:
                 start = hub.name
             elif hub.function == Zone_function.END:
                 end = hub.name
-        return self.solve(start, end)
+        drones = self.network.drones
+        print(f"t = {drones[0].t}")
+        for i in range(self.network.nb_drones):
+            print(f"Drone {drones[i].id}: {drones[i].current_hub}")
+            drones[i].t += 1
+        while not self.drones_arrived(end):
+            print(f"t = {drones[0].t}")
+            for i in range(self.network.nb_drones):
+                self.run_drone(i, start, end)

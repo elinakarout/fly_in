@@ -1,4 +1,4 @@
-from data import Network, Hub, Connection
+from data import Network, Hub, Connection, Drone
 
 
 def read_file(file_name: str) -> list[str]:
@@ -72,6 +72,18 @@ def create_connection(value: str) -> Connection:
         )
 
 
+def create_drones(nb_drones: int, start_hub: str):
+    drones = []
+    for i in range(nb_drones):
+        drones.append(Drone(
+            id = i + 1,
+            t = 0,
+            current_hub = start_hub,
+            arrived = False
+        ))
+    return drones
+
+
 def set_network(file_name: str) -> Network:
     file_content = (read_file(file_name))
     i = 0
@@ -82,6 +94,7 @@ def set_network(file_name: str) -> Network:
     nb_drones = 0
     hubs = []
     connections = []
+    start_hub = ""
     for line in file_content:
         if not line.startswith('#') and line.strip():
             key = line.strip().split(":", 2)
@@ -89,14 +102,19 @@ def set_network(file_name: str) -> Network:
                 nb_drones = int(key[1])
             elif key[0] == "start_hub":
                 hubs.append(create_hub(key[1], "start_hub"))
+                hubs[-1].max_drones = nb_drones
+                start_hub = hubs[-1].name
             elif key[0] == "end_hub":
                 hubs.append(create_hub(key[1], "end_hub"))
+                hubs[-1].max_drones = nb_drones
             elif key[0] == "hub":
                 hubs.append(create_hub(key[1], "hub"))
             elif key[0] == "connection":
                 connections.append(create_connection(key[1]))
+    drones = create_drones(nb_drones, start_hub)
     return Network(
         nb_drones=nb_drones,
+        drones = drones,
         hubs=hubs,
         connections=connections
         )
