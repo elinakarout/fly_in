@@ -1,9 +1,10 @@
 from parser import set_network
-# from algorithm import Algorithm
+from algorithm import Algorithm
 # from pydantic import ValidationError
 from visualisation import Drawer
 import sys
-# from pprint import pprint
+from pprint import pprint
+import arcade
 
 
 def main() -> None:
@@ -11,10 +12,12 @@ def main() -> None:
         print("Please specify the path of the text file!")
         return
     network = set_network(sys.argv[1])
+    algo = Algorithm(network)
+    algo.solve_map()
     drawer = Drawer(network)
-    drawer.draw_map()
-    # algo = Algorithm(network)
-    # algo.solve_map()
+    arcade.run()
+    for drone in network.drones:
+        pprint(drone.path)
 
 
 if __name__ == "__main__":

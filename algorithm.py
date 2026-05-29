@@ -7,6 +7,19 @@ class Algorithm:
         self.network = network
         self.graph = self.compute_graph(network)
 
+    def get_coordinates(self):
+        coordinates = {}
+        for hub in self.network.hubs:
+            coordinates[hub.name] = (hub.coord_x, hub.coord_y)
+        return coordinates
+
+    @staticmethod
+    def find_zone_type(network: Network, zone_name: str) -> Zone_type:
+        for hub in network.hubs:
+            if hub.name == zone_name:
+                return hub.zone_type
+        return Zone_type.NORMAL
+
     @staticmethod
     def compute_graph(network: Network) -> dict[str, list[tuple[str, float]]]:
         names = []
@@ -127,16 +140,43 @@ class Algorithm:
                 full_hubs.append(hub)
         return full_hubs
 
+    def get_full_connections(self, start: str) -> list[str]:
+        drones = self.network.drones
+        occupied = []
+        full_hubs = []
+        for i in range(self.network.nb_drones):
+            if drones[i].current_hub != start:
+                occupied.append(drones[i].current_hub)
+        counts: dict[str, int] = {}
+        for hub in occupied:
+            if hub in counts:
+                counts[hub] += 1
+            else:
+                counts[hub] = 1
+        for hub, count in counts.items():
+            max_drones = self.get_max_drones(hub)
+            if count == max_drones:
+                full_hubs.append(hub)
+        return full_hubs
+
     def run_drone(self, i: int, start: str, end: str) -> None:
         drone = self.network.drones[i]
+        coordinates = self.get_coordinates()
         drone.t += 1
+        if drone.wait_turn > 0:
+            drone.wait_turn -= 1
+            drone.path.append(coordinates[drone.current_hub])
+            return
         if drone.current_hub != end:
             full_hubs = self.get_full_hubs(start)
             if drone.current_hub != start:
                 full_hubs.append(start)
             next_hub = self.dijkistra(drone.current_hub, end, full_hubs)
             drone.current_hub = next_hub
-        print(f"Drone {drone.id}: {drone.current_hub}")
+            if (self.find_zone_type(self.network, next_hub) == Zone_type.RESTRICTED):
+                drone.wait_turn = 1
+        drone.path.append(coordinates[drone.current_hub])
+        # print(f"Drone {drone.id}: {drone.current_hub}")
 
     def solve_map(self) -> None:
         for hub in self.network.hubs:
@@ -145,11 +185,13 @@ class Algorithm:
             elif hub.function == Zone_function.END:
                 end = hub.name
         drones = self.network.drones
-        print(f"t = {drones[0].t}")
+        coordinates = self.get_coordinates()
+        # print(f"t = {drones[0].t}")
         for i in range(self.network.nb_drones):
-            print(f"Drone {drones[i].id}: {drones[i].current_hub}")
+            # print(f"Drone {drones[i].id}: {drones[i].current_hub}")
+            drones[i].path.append(coordinates[drones[i].current_hub])
             drones[i].t += 1
         while not self.drones_arrived(end):
-            print(f"t = {drones[0].t}")
+            # print(f"t = {drones[0].t}")
             for i in range(self.network.nb_drones):
                 self.run_drone(i, start, end)

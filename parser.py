@@ -67,7 +67,7 @@ def create_connection(value: str) -> Connection:
         hubs = tuple([values[0].strip(), values[1].strip()])
         max_link_capacity = 1
     return Connection(
-        hubs=hubs,
+        hubs=sorted(hubs),
         max_link_capacity=max_link_capacity
         )
 
@@ -79,7 +79,8 @@ def create_drones(nb_drones: int, start_hub: str) -> list[Drone]:
             id=i+1,
             t=0,
             current_hub=start_hub,
-            arrived=False
+            path=[],
+            wait_turn=0
         ))
     return drones
 

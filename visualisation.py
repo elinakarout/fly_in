@@ -3,12 +3,15 @@ import arcade
 import math
 
 
-class Drawer():
+class Drawer(arcade.Window):
     def __init__(self, network: Network) -> None:
+        self.network = network
         self.hubs = network.hubs
         self.nb_drones = network.nb_drones
         self.connections = network.connections
         if self.nb_drones < 8:
+            self.cell_size = 80
+        elif self.nb_drones < 10:
             self.cell_size = self.nb_drones * 10
         elif self.nb_drones < 15:
             self.cell_size = self.nb_drones * 5
@@ -16,14 +19,45 @@ class Drawer():
             self.cell_size = 70
         self.rows, self.y = self.get_rows(network)
         self.cols, self.x = self.get_cols(network)
-        self.height = self.rows * self.cell_size
-        self.width = self.cols * self.cell_size
+        height = self.rows * self.cell_size
+        width = self.cols * self.cell_size
+        super().__init__(width, height, "Fly In - ekarout")
+        self.width = width
+        self.height = height
         self.radius = 20
         if self.nb_drones < 10:
             self.extra_radius = 6
         else:
             self.extra_radius = 1
-        self.title = "Fly In - ekarout"
+        self.speed = 200
+        self.current_turn = 0
+        self.turn_duration = 2.0
+        self.turn_timer = 0
+        self.turn_label = arcade.Text(
+            "Turn: 0",
+            20,
+            self.height - 40,
+            arcade.color.BLACK,
+            20
+        )
+        self.drone_labels = self.get_drone_labels(self.network)
+        arcade.set_background_color(arcade.color.BABY_BLUE)
+
+    @staticmethod
+    def get_drone_labels(network: Network):
+        drone_labels = {}
+        i = 1
+        for drone in network.drones:
+            drone_labels[drone.id] = arcade.Text(
+                f"D{drone.id}",
+                0,
+                0,
+                arcade.color.BLACK,
+                6,
+                anchor_x="center",
+                anchor_y="center"
+            )
+        return drone_labels
 
     @staticmethod
     def get_rows(network: Network) -> tuple[int, int]:
@@ -101,23 +135,57 @@ class Drawer():
                 3
             )
 
-    def draw_drones(self, x: int, y: int) -> None:
-        points = [
-            (x, y + 10),
-            (x + 10, y),
-            (x, y - 10),
-            (x - 10, y),
-        ]
-        arcade.draw_polygon_filled(points, arcade.color.GRAY)
-        self.write_name("D1", x, y, 5)
+    def draw_drones(self) -> None:
+        progress = self.turn_timer / self.turn_duration
+        for drone in self.network.drones:
+            if self.current_turn >= len(drone.path) - 1:
+                grid_x, grid_y = drone.path[-1]
+            else:
+                start_x, start_y = drone.path[self.current_turn]
+                end_x, end_y = drone.path[self.current_turn + 1]
+                grid_x = start_x + (end_x - start_x) * progress
+                grid_y = start_y + (end_y - start_y) * progress
+            if drone.id % 2:
+                extra = + 4
+            else:
+                extra = - 4
+            x = (grid_x + self.x) * self.cell_size + extra
+            y = (grid_y + self.y) * self.cell_size + extra
+            points = [
+                (x, y + 10),
+                (x + 10, y),
+                (x, y - 10),
+                (x - 10, y),
+            ]
+            arcade.draw_polygon_filled(
+                points,
+                arcade.color.GRAY
+            )
+            arcade.draw_polygon_outline(
+                points,
+                arcade.color.BLACK,
+                2
+            )
+            label = self.drone_labels[drone.id]
+            label.x = x
+            label.y = y
+            label.draw()
 
-    def draw_map(self) -> None:
-        arcade.open_window(self.width, self.height, self.title)
-        arcade.set_background_color(arcade.color.BABY_BLUE)
-        arcade.start_render()
+    def on_update(self, delta_time) -> None:
+
+        self.turn_timer += delta_time
+        if (
+            self.turn_timer >= self.turn_duration
+            and self.current_turn < len(self.network.drones[0].path) - 1
+        ):
+            self.turn_timer = 0
+            self.current_turn += 1
+            self.turn_label.text = f"Turn: {self.current_turn}"
+
+    def on_draw(self) -> None:
+        self.clear()
         self.draw_grid()
         self.draw_connections()
         self.draw_hubs()
-        self.draw_drones(self.x * self.cell_size, self.y * self.cell_size)
-        arcade.finish_render()
-        arcade.run()
+        self.draw_drones()
+        self.turn_label.draw()
