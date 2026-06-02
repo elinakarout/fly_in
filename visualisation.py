@@ -31,7 +31,7 @@ class Drawer(arcade.Window):
             self.extra_radius = 1
         self.speed = 200
         self.current_turn = 0
-        self.turn_duration = 2.0
+        self.turn_duration = 1.5
         self.turn_timer = 0
         self.turn_label = arcade.Text(
             "Turn: 0",
@@ -121,7 +121,7 @@ class Drawer(arcade.Window):
             arcade.draw_circle_filled(
                 x, y, radius, color
             )
-            self.write_name(hub.name, x, y, 10)
+            self.write_name(hub.name, x, y, 7)
 
     def draw_connections(self) -> None:
         coordinates = self.map_coords()

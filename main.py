@@ -13,11 +13,12 @@ def main() -> None:
         return
     network = set_network(sys.argv[1])
     algo = Algorithm(network)
-    algo.solve_map()
+    algo.simulation()
     drawer = Drawer(network)
     arcade.run()
     for drone in network.drones:
-        pprint(drone.path)
+        print(f"Drone {drone.id}:")
+        print(drone.path)
 
 
 if __name__ == "__main__":
