@@ -185,8 +185,10 @@ class Algorithm:
 
     def check_best_option(self, drone: Drone, end: str) -> str:
         options = [option for option, cost in self.graph[drone.current_hub]]
+        if drone.previous_hub in options:
+            options.remove(drone.previous_hub)
         best_option = drone.current_hub
-        best_cost = self.distances[drone.current_hub] + 1
+        best_cost = self.distances[drone.current_hub] + 0.5
         for option in options:
             if (
                 option == end
@@ -203,7 +205,7 @@ class Algorithm:
                 best_cost = self.distances[option] - 0.5
                 best_option = option
             elif (
-                self.distances[option] < best_cost
+                self.distances[option] <= best_cost
                 and self.check_hub_change(drone.current_hub, option)
             ):
                 best_option = option
@@ -241,7 +243,7 @@ class Algorithm:
                 drone.used_connection = (a, b)
             if (
                 self.check_restricted(drone.current_hub)
-                and drone.wait_turn == 0
+                and drone.current_hub != drone.previous_hub
             ):
                 drone.wait_turn += 1
                 x1, y1 = self.coordinates[drone.previous_hub]
