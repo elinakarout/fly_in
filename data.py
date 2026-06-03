@@ -46,7 +46,7 @@ class Drone(BaseModel):
     t: int
     current_hub: str
     previous_hub: str | None = Field(default=None)
-    path: list[tuple[int, int]]
+    path: list[tuple[float, float]]
     used_connection: tuple[str, str] | None = Field(default=None)
     wait_turn: int
 

@@ -137,6 +137,8 @@ class Drawer(arcade.Window):
     def draw_drones(self) -> None:
         progress = self.turn_timer / self.turn_duration
         for drone in self.network.drones:
+            grid_x: float
+            grid_y: float
             if self.current_turn >= len(drone.path) - 1:
                 grid_x, grid_y = drone.path[-1]
             else:

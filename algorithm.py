@@ -146,7 +146,7 @@ class Algorithm:
             total_cost += all_costs[node]
         return total_cost
 
-    def compute_distances(self) -> dict[str, int]:
+    def compute_distances(self) -> dict[str, float]:
         distances = {}
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
@@ -155,10 +155,10 @@ class Algorithm:
                 end = hub.name
         for node in self.graph:
             if node == end:
-                distances[node] = 0
+                distances[node] = 0.0
             path = self.dijkistra(end, node)
             distances[node] = self.get_cost(path)
-        if distances[start] == 0:
+        if distances[start] == 0.0:
             raise ValueError("The map is unsolvable")
         return distances
 
@@ -243,6 +243,7 @@ class Algorithm:
                 drone.used_connection = (a, b)
             if (
                 self.check_restricted(drone.current_hub)
+                and drone.previous_hub is not None
                 and drone.current_hub != drone.previous_hub
             ):
                 drone.wait_turn += 1
