@@ -31,7 +31,10 @@ def create_hub(value: str, function: str) -> Hub:
         }
         zone_type = metadata.get("zone", "normal")
         color = metadata.get("color", "none")
-        max_drones = int(metadata.get("max_drones", 1))
+        if zone_type == "blocked":
+            max_drones = 0
+        else:
+            max_drones = int(metadata.get("max_drones", 1))
     else:
         zone_type = "normal"
         color = "none"

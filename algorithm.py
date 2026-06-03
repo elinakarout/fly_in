@@ -239,9 +239,18 @@ class Algorithm:
             else:
                 a, b = sorted((drone.previous_hub, drone.current_hub))
                 drone.used_connection = (a, b)
-            if self.check_restricted(drone.current_hub):
+            if (
+                self.check_restricted(drone.current_hub)
+                and drone.wait_turn == 0
+            ):
                 drone.wait_turn += 1
-            drone.path.append(self.coordinates[drone.current_hub])
+                x1, y1 = self.coordinates[drone.previous_hub]
+                x2, y2 = self.coordinates[drone.current_hub]
+                x = (x1 + x2) / 2
+                y = (y1 + y2) / 2
+                drone.path.append((x, y))
+            else:
+                drone.path.append(self.coordinates[drone.current_hub])
             done.append(i)
 
     def simulation_done(self, end: str) -> bool:
