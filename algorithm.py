@@ -1,7 +1,5 @@
 from data import Network, Zone_type, Zone_function, Drone
 import heapq
-from pprint import pprint
-
 
 
 class Algorithm:
@@ -12,7 +10,7 @@ class Algorithm:
         self.hubs_capacity = self.get_hubs_capacity(network)
         self.connections_capacity = self.get_connections_capacity(network)
         self.distances = self.compute_distances()
-    
+
     @staticmethod
     def compute_graph(network: Network) -> dict[str, list[tuple[str, float]]]:
         names = []
@@ -46,16 +44,16 @@ class Algorithm:
             graph[name] = options
             options = []
         return graph
-    
+
     @staticmethod
-    def get_coordinates(network: Network):
+    def get_coordinates(network: Network) -> dict[str, tuple[int, int]]:
         coordinates = {}
         for hub in network.hubs:
             coordinates[hub.name] = (hub.coord_x, hub.coord_y)
         return coordinates
 
     @staticmethod
-    def get_hubs_capacity(network: Network):
+    def get_hubs_capacity(network: Network) -> dict[str, int]:
         capacity = {}
         for hub in network.hubs:
             if hub.function == Zone_function.START:
@@ -63,17 +61,22 @@ class Algorithm:
             else:
                 capacity[hub.name] = hub.max_drones
         return capacity
-    
+
     @staticmethod
-    def get_connections_capacity(network: Network):
+    def get_connections_capacity(
+        network: Network
+    ) -> dict[tuple[str, str], int]:
         capacity = {}
         for connection in network.connections:
             capacity[connection.hubs] = connection.max_link_capacity
         return capacity
 
     @staticmethod
-    def get_path(came_from: dict[tuple[int, int], tuple[int, int]],
-                start: tuple[int, int], goal: tuple[int, int]) -> list[str]:
+    def get_path(
+        came_from: dict[str, str],
+        start: str,
+        goal: str
+    ) -> list[str]:
         """Find the path from came_from dict"""
         path = []
         current = goal
@@ -113,7 +116,7 @@ class Algorithm:
                     heapq.heappush(open_set, (tentative_g, counter, name))
                     counter += 1
         return []
-    
+
     def check_restricted(self, to_check: str) -> bool:
         for hub in self.network.hubs:
             if hub.name == to_check:
@@ -126,7 +129,7 @@ class Algorithm:
                 return hub.zone_type == Zone_type.PRIORITY
         return False
 
-    def get_cost(self, path: list[str]):
+    def get_cost(self, path: list[str]) -> float:
         all_costs = {}
         for hub in self.network.hubs:
             if hub.zone_type == Zone_type.NORMAL:
@@ -143,7 +146,7 @@ class Algorithm:
             total_cost += all_costs[node]
         return total_cost
 
-    def compute_distances(self):
+    def compute_distances(self) -> dict[str, int]:
         distances = {}
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
@@ -152,7 +155,7 @@ class Algorithm:
                 end = hub.name
         for node in self.graph:
             if node == end:
-                distances_node = 0
+                distances[node] = 0
             path = self.dijkistra(end, node)
             distances[node] = self.get_cost(path)
         if distances[start] == 0:
@@ -164,7 +167,8 @@ class Algorithm:
             return False
         if (src == target):
             return True
-        connection = tuple(sorted((src, target)))
+        a, b = sorted((src, target))
+        connection = (a, b)
         if self.connections_capacity[connection] == 0:
             return False
         return True
@@ -175,9 +179,10 @@ class Algorithm:
         self.hubs_capacity[target] -= 1
         self.hubs_capacity[src] += 1
         if (src != target):
-            connection = tuple(sorted((src, target)))
+            a, b = sorted((src, target))
+            connection = (a, b)
             self.connections_capacity[connection] -= 1
-    
+
     def check_best_option(self, drone: Drone, end: str) -> str:
         options = [option for option, cost in self.graph[drone.current_hub]]
         best_option = drone.current_hub
@@ -195,11 +200,9 @@ class Algorithm:
                 and option != drone.current_hub
                 and option != drone.previous_hub
             ):
-                print(f"Turn {drone.t}:")
-                print(f"{drone.id}: curr: {drone.current_hub} prev: {drone.previous_hub} option {option}")
                 best_cost = self.distances[option] - 0.5
                 best_option = option
-            elif(
+            elif (
                 self.distances[option] < best_cost
                 and self.check_hub_change(drone.current_hub, option)
             ):
@@ -208,7 +211,7 @@ class Algorithm:
         self.change_hub(drone.current_hub, best_option)
         return best_option
 
-    def run_drones(self, end) -> None:
+    def run_drones(self, end: str) -> None:
         done = []
         for i in range(self.network.nb_drones):
             drone = self.network.drones[i]
@@ -228,15 +231,19 @@ class Algorithm:
                 new_hub = self.check_best_option(drone, end)
                 drone.previous_hub = drone.current_hub
                 drone.current_hub = new_hub
-            if drone.current_hub == drone.previous_hub:
+            if (
+                drone.current_hub == drone.previous_hub
+                or drone.previous_hub is None
+            ):
                 drone.used_connection = None
             else:
-                used_connection = tuple(sorted((drone.previous_hub, drone.current_hub)))
+                a, b = sorted((drone.previous_hub, drone.current_hub))
+                drone.used_connection = (a, b)
             if self.check_restricted(drone.current_hub):
                 drone.wait_turn += 1
             drone.path.append(self.coordinates[drone.current_hub])
             done.append(i)
-    
+
     def simulation_done(self, end: str) -> bool:
         drones = self.network.drones
         for i in range(self.network.nb_drones):
@@ -246,7 +253,7 @@ class Algorithm:
                 return False
         return True
 
-    def simulation(self):
+    def simulation(self) -> None:
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
                 start = hub.name
@@ -256,17 +263,6 @@ class Algorithm:
             drone.path.append(self.coordinates[start])
         while not self.simulation_done(end):
             self.run_drones(end)
-            self.connections_capacity = self.get_connections_capacity(self.network)
-
-
-# graph=
-# {'goal': [('path_a', 1.0), ('path_b', 1.0)],
-#  'junction': [('start', 1.0), ('path_a', 1.0), ('path_b', 1.0)],
-#  'path_a': [('junction', 1.0), ('goal', 1.0)],
-#  'path_b': [('junction', 1.0), ('goal', 1.0)],
-#  'start': [('junction', 1.0)]}
-
-
-
-# distances=
-# {'junction': 2.0, 'path_a': 1.0, 'path_b': 1.0, 'start': 3.0}
+            self.connections_capacity = (
+                self.get_connections_capacity(self.network)
+            )

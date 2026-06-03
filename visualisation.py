@@ -31,8 +31,8 @@ class Drawer(arcade.Window):
             self.extra_radius = 1
         self.speed = 200
         self.current_turn = 0
-        self.turn_duration = 1.5
-        self.turn_timer = 0
+        self.turn_duration = 0.5
+        self.turn_timer = 0.0
         self.turn_label = arcade.Text(
             "Turn: 0",
             20,
@@ -44,9 +44,8 @@ class Drawer(arcade.Window):
         arcade.set_background_color(arcade.color.BABY_BLUE)
 
     @staticmethod
-    def get_drone_labels(network: Network):
+    def get_drone_labels(network: Network) -> dict[int, arcade.Text]:
         drone_labels = {}
-        i = 1
         for drone in network.drones:
             drone_labels[drone.id] = arcade.Text(
                 f"D{drone.id}",
@@ -171,7 +170,7 @@ class Drawer(arcade.Window):
             label.y = y
             label.draw()
 
-    def on_update(self, delta_time) -> None:
+    def on_update(self, delta_time: float) -> None:
 
         self.turn_timer += delta_time
         if (

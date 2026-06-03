@@ -15,3 +15,9 @@ which python
 
 Install packages:
 make install
+
+
+
+/!\ TO FIX /!\
+RESTRICTED IS WRONG!
+it cannot wait in the zone 2 turns, it takes 2 turns to arrive. So it stays at the connection for 1 turn, the second it arrives

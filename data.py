@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
 from typing import Self
 from enum import Enum
-import arcade
 
 
 class Zone_function(Enum):
@@ -50,6 +49,7 @@ class Drone(BaseModel):
     path: list[tuple[int, int]]
     used_connection: tuple[str, str] | None = Field(default=None)
     wait_turn: int
+
 
 class Network(BaseModel):
     nb_drones: int
@@ -117,6 +117,3 @@ class Network(BaseModel):
                 )
             seen.add(pair)
         return self
-
-
-

@@ -1,9 +1,8 @@
 from parser import set_network
 from algorithm import Algorithm
-# from pydantic import ValidationError
+from pydantic import ValidationError
 from visualisation import Drawer
 import sys
-from pprint import pprint
 import arcade
 
 
@@ -14,18 +13,14 @@ def main() -> None:
     network = set_network(sys.argv[1])
     algo = Algorithm(network)
     algo.simulation()
-    drawer = Drawer(network)
+    Drawer(network)
     arcade.run()
-    for drone in network.drones:
-        print(f"Drone {drone.id}:")
-        print(drone.path)
 
 
 if __name__ == "__main__":
-    # try:
-    #     main()
-    # except ValidationError as e:
-    #     print(e.errors()[0]["msg"])
-    # except Exception as e:
-    #     print(e)
-    main()
+    try:
+        main()
+    except ValidationError as e:
+        print(e.errors()[0]["msg"])
+    except Exception as e:
+        print(e)
