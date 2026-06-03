@@ -24,3 +24,5 @@ if __name__ == "__main__":
         print(e.errors()[0]["msg"])
     except Exception as e:
         print(e)
+    finally:
+        print("\nThank you for checking my project :)")

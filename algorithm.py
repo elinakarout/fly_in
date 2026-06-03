@@ -117,6 +117,18 @@ class Algorithm:
                     counter += 1
         return []
 
+    def reset_connection_capacity(self) -> dict[tuple[str, str], int]:
+        capacity = self.get_connections_capacity(self.network)
+        for drone in self.network.drones:
+            if (
+                drone.wait_turn > 0
+                and drone.previous_hub is not None
+            ):
+                a, b = sorted((drone.current_hub, drone.previous_hub))
+                connection = (a, b)
+                capacity[connection] += 1
+        return capacity
+
     def check_restricted(self, to_check: str) -> bool:
         for hub in self.network.hubs:
             if hub.name == to_check:
@@ -265,6 +277,26 @@ class Algorithm:
                 return False
         return True
 
+    def print_log(self, start: str, end: str) -> None:
+        for drone in self.network.drones:
+            if drone.wait_turn > 0:
+                print(
+                    f"D{drone.id}-{drone.previous_hub}-{drone.current_hub} ",
+                    end=""
+                )
+            elif (
+                drone.previous_hub != drone.current_hub
+                and drone.current_hub != start
+                and not drone.done
+            ):
+                print(
+                    f"D{drone.id}-{drone.current_hub} ",
+                    end=""
+                )
+            if drone.current_hub == end:
+                drone.done = True
+        print()
+
     def simulation(self) -> None:
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
@@ -273,8 +305,9 @@ class Algorithm:
                 end = hub.name
         for drone in self.network.drones:
             drone.path.append(self.coordinates[start])
+        print()
         while not self.simulation_done(end):
             self.run_drones(end)
-            self.connections_capacity = (
-                self.get_connections_capacity(self.network)
-            )
+            self.connections_capacity = self.reset_connection_capacity()
+            self.print_log(start, end)
+        print(f"\nTotal turns: {self.network.drones[0].t}!")

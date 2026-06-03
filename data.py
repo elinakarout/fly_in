@@ -49,6 +49,7 @@ class Drone(BaseModel):
     path: list[tuple[float, float]]
     used_connection: tuple[str, str] | None = Field(default=None)
     wait_turn: int
+    done: bool = Field(default=False)
 
 
 class Network(BaseModel):
