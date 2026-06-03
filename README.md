@@ -1,177 +1,169 @@
-_This project has been created as part of the 42 curriculum by ekarout_
+> *This project was created as part of the 42 curriculum by **ekarout***
 
-# Fly_In
+<div align="center">
 
-## Description
+# 🚁 Fly_In
 
-Fly_In is a graph-based drone routing and simulation system developed as part of the 42 curriculum.  
-Its goal is to simulate and optimize the movement of multiple drones through a constrained network of hubs and connections.
+**A graph-based drone routing and simulation system**
 
-Each hub represents a node in a directed weighted graph, and each connection represents a possible path between hubs.  
-The system must compute valid routes while respecting constraints such as hub capacity, link capacity, and dynamic occupancy during simulation.
-
-The project focuses on:
-- Efficient path computation in constrained graphs  
-- Multi-agent (multi-drone) simulation  
-- Real-time constraint handling (capacity and congestion)  
-- Turn-based execution of movement  
-- Visual representation of the simulation state  
+*Part of the 42 Curriculum*
 
 ---
 
-## Instructions
+</div>
 
-### Installation
+## Overview
 
-Clone the repository:
+**Fly_In** simulates and optimizes the movement of multiple drones through a constrained network of hubs and connections.
+
+Each **hub** is a node in a directed weighted graph. Each **connection** is a possible path between hubs. The system computes valid routes while respecting real-time constraints — hub capacity, link throughput, and dynamic occupancy across simulation turns.
+
+### What it focuses on
+
+- 🗺️ **Efficient path computation** in constrained graphs
+- 🤖 **Multi-agent simulation** with simultaneous drone movement
+- ⚡ **Real-time constraint handling** — capacity and congestion
+- 🔄 **Turn-based execution** with deterministic behavior
+- 🖥️ **Visual representation** of the full simulation state
+
+---
+
+## Installation
+
+### 1. Clone the repository
+
 ```bash
 git clone git@vogsphere.42beirut.com:vogsphere/intra-uuid-91c09e60-5819-4f41-a8a7-29c016580a20-7432156-ekarout
 cd fly_in
 ```
-Create a virtual environment and activate it:
+
+### 2. Create and activate a virtual environment
+
 ```bash
 python3 -m venv fly_in
 source fly_in/bin/activate
-# Check if you're inside the venv:
+
+# Verify you're inside the venv:
 which python
 ```
 
-Install dependencies:
+### 3. Install dependencies
+
 ```bash
 make install
 ```
 
-### Execution
+---
 
-Run the simulation with makefile:
+## Running the Simulation
+
+### With Make (recommended)
+
 ```bash
-make run MAP=EASY1 # translates to maps/easy/01_linear_path.txt
-
-make run MAP=EASY2 # translates to maps/easy/02_simple_fork.txt
-
-make run MAP=EASY3 # translates to maps/easy/03_basic_capacity.txt
-
-make run MAP=MEDIUM1 # translates to /maps/medium/01_dead_end_trap.txt
-
-make run MAP=MEDIUM2 # translates to /maps/medium/02_circular_loop.txt
-
-make run MAP=MEDIUM3 # translates to /maps/medium/03_priority_puzzle.txt
-
-make run MAP=HARD1 # translates to /maps/hard/01_maze_nightmare.txt
-
-make run MAP=HARD2 # translates to /maps/hard/02_capacity_hell.txt
-
-make run MAP=HARD3 # translates to /maps/hard/03_ultimate_challenge.txt
-
-make run MAP=CHALLENGER # translates to maps/challenger/01_the_impossible_dream.txt
+make run MAP=<MAP_NAME>
 ```
 
-Run the simulation without makefile:
+| Map Name | File Path |
+|---|---|
+| `EASY1` | `maps/easy/01_linear_path.txt` |
+| `EASY2` | `maps/easy/02_simple_fork.txt` |
+| `EASY3` | `maps/easy/03_basic_capacity.txt` |
+| `MEDIUM1` | `maps/medium/01_dead_end_trap.txt` |
+| `MEDIUM2` | `maps/medium/02_circular_loop.txt` |
+| `MEDIUM3` | `maps/medium/03_priority_puzzle.txt` |
+| `HARD1` | `maps/hard/01_maze_nightmare.txt` |
+| `HARD2` | `maps/hard/02_capacity_hell.txt` |
+| `HARD3` | `maps/hard/03_ultimate_challenge.txt` |
+| `CHALLENGER` | `maps/challenger/01_the_impossible_dream.txt` |
+
+### Without Make
+
 ```bash
 python3 main.py <PATH_TO_FILE>
 ```
 
 ---
 
-## Algorithm Choices & Implementation Strategy
+## Algorithm & Design
 
 ### Graph Representation
-The network is modeled as a graph:
-- Nodes represent hubs
-- Edges represent connections between hubs
 
-An adjacency list structure is used for efficient traversal and updates.
+The network is modeled as a directed weighted graph:
 
----
-### Pathfinding (Core Logic)
-The routing system is based on **Dijkstra’s algorithm**, used to compute shortest paths from a source hub to a destination hub.
+- **Nodes** → hubs
+- **Edges** → connections between hubs
 
-However, the classical algorithm is extended with constraint-aware logic:
-
-#### Hub Capacity Constraint
-Each hub has a maximum drone capacity.  
-Before committing to a path or moving a drone, the algorithm checks whether the destination hub has available capacity.
-
-If a hub is full, it is treated as temporarily unavailable during path selection.
+An **adjacency list** structure is used for efficient traversal and state updates.
 
 ---
 
-#### Link Capacity Constraint
-Each connection between hubs has a maximum throughput capacity.  
-The algorithm ensures that no more drones than allowed traverse a link at the same time step.
+### Pathfinding
 
-If a link is saturated, it is skipped during neighbor exploration
----
+Routing is built on **Dijkstra's algorithm**, extended with constraint-aware logic:
 
-#### No Backtracking / Dead-End Handling
-If a drone reaches a state where:
-- No forward move satisfies constraints, and
-- No alternative valid path exists,
+#### Hub Capacity
+Each hub has a maximum drone capacity. Before committing to a path, the algorithm checks available capacity. Hubs at capacity are treated as temporarily unavailable.
 
-then the drone remains at its current hub for that turn.
+#### Link Capacity
+Each connection has a maximum throughput. If a link is saturated for the current time step, it is skipped during neighbor exploration.
 
-This prevents invalid oscillations and ensures stability in congested scenarios.
+#### Dead-End Handling
+If a drone has no valid forward move — and no alternative path satisfies constraints — it remains in place for that turn. This prevents invalid oscillations and ensures stability under congestion.
 
 ---
 
-### Multi-Drone Simulation Model
-The simulation runs in discrete time steps (“turns”):
+### Multi-Drone Simulation
+
+The simulation runs in discrete **turns**:
 
 1. Each drone evaluates or updates its path
-2. Movement decisions are computed based on current graph state
+2. Movement decisions are computed against the current graph state
 3. Capacity constraints are validated globally
-4. All valid movements are executed simultaneously per turn
+4. All valid movements execute simultaneously
 
-This ensures deterministic behavior and avoids ordering bias between drones.
+This guarantees deterministic behavior and eliminates ordering bias between drones.
 
 ---
 
-### Optimization Strategy
-- Graph preprocessing to reduce repeated computations  
-- Reuse of computed shortest paths when valid  
-- Early termination when destination is reached  
-- Avoiding unnecessary recomputation unless constraints change 
+### Optimization
 
+- Graph preprocessing to reduce repeated computation
+- Reuse of computed shortest paths when still valid
+- Early termination upon reaching destination
+- Recomputation only triggered when constraints change
 
-## Visual Representation
+---
 
-The project includes a real-time visualization system for debugging and user experience.
+## Visualization
 
-### Features
-- Hubs displayed as nodes in a coordinate space  
-- Connections rendered as edges between hubs  
-- Drones represented as moving entities along edges  
-- Real-time updates per simulation turn  
-- Turn counter displayed on screen  
-- Labels for drones (e.g., D1, D2, etc.)  
-- Visual feedback of congestion and movement flow  
+The project includes a real-time visualization system for debugging and observability.
 
-### User Experience Improvements
-- Makes pathfinding behavior observable  
-- Helps identify bottlenecks and constraint violations  
-- Provides intuitive understanding of multi-agent interactions  
-- Enhances debugging of routing and simulation logic  
+| Feature | Description |
+|---|---|
+| 🔵 Nodes | Hubs displayed at their coordinate positions |
+| ➡️ Edges | Connections rendered between hubs |
+| 🚁 Drones | Moving entities labeled D1, D2, etc. |
+| 🔢 Turn Counter | Current simulation step shown on screen |
+| 🔴 Congestion | Visual feedback on bottlenecks and constraint violations |
+
+The visualizer makes pathfinding behavior observable, helps identify bottlenecks, and provides intuitive insight into multi-agent interactions.
+
+---
+
+## Notes
+
+- The simulation is **deterministic** under identical inputs
+- Performance scales with graph size and number of active drones
+- Future improvements may include advanced flow algorithms or heuristic routing enhancements
 
 ---
 
 ## Resources
 
-### References
-- Dijkstra, E. W. (1959). Shortest Path Algorithm  
-- https://cp-algorithms.com/graph/dijkstra.html  
-- https://docs.python.org/3/library/typing.html  
+- Dijkstra, E. W. (1959). *A note on two problems in connexion with graphs*
+- [cp-algorithms.com — Dijkstra's Algorithm](https://cp-algorithms.com/graph/dijkstra.html)
+- [Python `typing` module docs](https://docs.python.org/3/library/typing.html)
 
 ### AI Usage
-AI assistance was used for:
-- Debugging Python type issues (e.g., static typing and mypy errors)  
-- Structuring documentation in a clear format  
-- Improving explanations of simulation decisions  
 
-All AI-generated suggestions were reviewed and adapted to match the actual implementation.
-
----
-
-## Notes
-- The simulation is deterministic under identical inputs  
-- Performance depends on graph size and number of active drones  
-- Future improvements may include advanced flow algorithms or heuristic routing enhancements  
+AI assistance was used for debugging Python type issues (static typing and mypy errors), structuring documentation, and improving explanations of simulation decisions. All suggestions were reviewed and adapted to match the actual implementation.
