@@ -3,6 +3,9 @@ import heapq
 
 
 class Algorithm:
+    """
+    Algorithm class, with all required methods to solve the map
+    """
     def __init__(self, network: Network) -> None:
         self.network = network
         self.graph = self.compute_graph(network)
@@ -13,6 +16,11 @@ class Algorithm:
 
     @staticmethod
     def compute_graph(network: Network) -> dict[str, list[tuple[str, float]]]:
+        """
+        Computing graph that will be used with dijkistra
+        Each hub name is a key, with values being a tuple of
+        neighboring hubs, with their cost (relative to the zone type)
+        """
         names = []
         graph = {}
         for hub in network.hubs:
@@ -47,6 +55,9 @@ class Algorithm:
 
     @staticmethod
     def get_coordinates(network: Network) -> dict[str, tuple[int, int]]:
+        """
+        A dictionary with the name of each hub, and its (x, y) coordinates
+        """
         coordinates = {}
         for hub in network.hubs:
             coordinates[hub.name] = (hub.coord_x, hub.coord_y)
@@ -54,6 +65,11 @@ class Algorithm:
 
     @staticmethod
     def get_hubs_capacity(network: Network) -> dict[str, int]:
+        """
+        Each hub name, with its current capacity.
+        Initialised with max_drones of the hub,
+        to be modified during simulation
+        """
         capacity = {}
         for hub in network.hubs:
             if hub.function == Zone_function.START:
@@ -66,6 +82,11 @@ class Algorithm:
     def get_connections_capacity(
         network: Network
     ) -> dict[tuple[str, str], int]:
+        """
+        Each connection tuple, with its current capacity.
+        Initialised with max_drones of the connection,
+        to be modified during simulation
+        """
         capacity = {}
         for connection in network.connections:
             capacity[connection.hubs] = connection.max_link_capacity
@@ -77,7 +98,9 @@ class Algorithm:
         start: str,
         goal: str
     ) -> list[str]:
-        """Find the path from came_from dict"""
+        """
+        Find the path from came_from dict
+        """
         path = []
         current = goal
         while current != start:
@@ -87,7 +110,10 @@ class Algorithm:
         return path
 
     def dijkistra(self, start: str, goal: str) -> list[str]:
-        """dijkistra path finding algorithm"""
+        """
+        Dijkistra path finding algorithm
+        returns the shortest path from start to goal
+        """
         open_set: list[tuple[float, int, str]] = []
         came_from: dict[str, str] = {}
         closed_set = set()
@@ -118,6 +144,11 @@ class Algorithm:
         return []
 
     def reset_connection_capacity(self) -> dict[tuple[str, str], int]:
+        """
+        Reset Connection capacity at the end of every turn,
+        While taking in consideration drones that are in a connection
+        leading to a restricted zone
+        """
         capacity = self.get_connections_capacity(self.network)
         for drone in self.network.drones:
             if (
@@ -130,18 +161,28 @@ class Algorithm:
         return capacity
 
     def check_restricted(self, to_check: str) -> bool:
+        """
+        Returns wether given hub name is a restricted zone or not
+        """
         for hub in self.network.hubs:
             if hub.name == to_check:
                 return hub.zone_type == Zone_type.RESTRICTED
         return False
 
     def check_priority(self, to_check: str) -> bool:
+        """
+        Returns wether given hub name is a priority zone or not
+        """
         for hub in self.network.hubs:
             if hub.name == to_check:
                 return hub.zone_type == Zone_type.PRIORITY
         return False
 
     def get_cost(self, path: list[str]) -> float:
+        """
+        Takes the path list, and calculates the sum of the
+        cost of each node in the path, to get the total cost of the path
+        """
         all_costs = {}
         for hub in self.network.hubs:
             if hub.zone_type == Zone_type.NORMAL:
@@ -159,6 +200,12 @@ class Algorithm:
         return total_cost
 
     def compute_distances(self) -> dict[str, float]:
+        """
+        Calls dijkistra from the end node to each node on the map,
+        and returns the distance of each node to the goal.
+        Makes sure the start and end hub are connected, else raises
+        an error
+        """
         distances = {}
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
@@ -175,6 +222,10 @@ class Algorithm:
         return distances
 
     def check_hub_change(self, src: str, target: str) -> bool:
+        """
+        Returns True if the target hub and the connection from source to target
+        both have capicity
+        """
         if self.hubs_capacity[target] == 0:
             return False
         if (src == target):
@@ -186,6 +237,11 @@ class Algorithm:
         return True
 
     def change_hub(self, src: str, target: str) -> None:
+        """
+        If hub change is feasible, computes the change by changing
+        corresponding capacities, so the next drone checks on the
+        updated capacity
+        """
         if not self.check_hub_change(src, target):
             return
         self.hubs_capacity[target] -= 1
@@ -196,6 +252,11 @@ class Algorithm:
             self.connections_capacity[connection] -= 1
 
     def check_best_option(self, drone: Drone, end: str) -> str:
+        """
+        Takes the option of the drone depending on its current hub,
+        and choses the best one, according to best distance, and available
+        capacity
+        """
         options = [option for option, cost in self.graph[drone.current_hub]]
         if drone.previous_hub in options:
             options.remove(drone.previous_hub)
@@ -226,6 +287,10 @@ class Algorithm:
         return best_option
 
     def run_drones(self, end: str) -> None:
+        """
+        Runs the drones, and changes each parameter:
+        Current hub, previous hub....
+        """
         done = []
         for i in range(self.network.nb_drones):
             drone = self.network.drones[i]
@@ -269,6 +334,9 @@ class Algorithm:
             done.append(i)
 
     def simulation_done(self, end: str) -> bool:
+        """
+        Returns true if all drones have arrived
+        """
         drones = self.network.drones
         for i in range(self.network.nb_drones):
             if drones[i].current_hub != end:
@@ -278,6 +346,9 @@ class Algorithm:
         return True
 
     def print_log(self, start: str, end: str) -> None:
+        """
+        Prints turn output on the terminal
+        """
         for drone in self.network.drones:
             if drone.wait_turn > 0:
                 print(
@@ -298,6 +369,9 @@ class Algorithm:
         print()
 
     def simulation(self) -> None:
+        """
+        Runs the main loop until all drones have arrived
+        """
         for hub in self.network.hubs:
             if hub.function == Zone_function.START:
                 start = hub.name

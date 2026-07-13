@@ -2,6 +2,9 @@ from data import Network, Hub, Connection, Drone
 
 
 def read_file(file_name: str) -> list[str]:
+    """
+    Reads the given file name, and returns its content
+    """
     try:
         with open(file_name, "r") as fd:
             content = fd.readlines()
@@ -11,6 +14,10 @@ def read_file(file_name: str) -> list[str]:
 
 
 def create_hub(value: str, function: str) -> Hub:
+    """
+    Creates a Hub instance,
+    with parameters according to the given string
+    """
     values = value.strip().split(" ", 3)
     if (len(values) < 3):
         raise ValueError("Hub format should be: <name> <x> <y> [metadata]!")
@@ -51,6 +58,10 @@ def create_hub(value: str, function: str) -> Hub:
 
 
 def create_connection(value: str) -> Connection:
+    """
+    Creates a Connection instance,
+    with parameters according to the given string
+    """
     values = value.strip().split("-", 2)
     if (len(values) < 2):
         raise ValueError(
@@ -76,6 +87,10 @@ def create_connection(value: str) -> Connection:
 
 
 def create_drones(nb_drones: int, start_hub: str) -> list[Drone]:
+    """
+    Creates an array of nb_drones Drone instances,
+    with starting parameters
+    """
     drones = []
     for i in range(nb_drones):
         drones.append(Drone(
@@ -89,6 +104,11 @@ def create_drones(nb_drones: int, start_hub: str) -> list[Drone]:
 
 
 def set_network(file_name: str) -> Network:
+    """
+    Reads the content of a file, and creates a
+    Network instance, with the appropriate Hub,
+    Connection, and Drone instances
+    """
     file_content = (read_file(file_name))
     i = 0
     while file_content[i].startswith("#") or not file_content[i].strip():

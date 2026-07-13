@@ -12,7 +12,7 @@
 
 </div>
 
-## Overview
+## Description
 
 **Fly_In** simulates and optimizes the movement of multiple drones through a constrained network of hubs and connections.
 
@@ -28,23 +28,13 @@ Each **hub** is a node in a directed weighted graph. Each **connection** is a po
 
 ---
 
-## Installation
+## Instructions
 
 ### 1. Clone the repository
 
 ```bash
 git clone git@vogsphere.42beirut.com:vogsphere/intra-uuid-91c09e60-5819-4f41-a8a7-29c016580a20-7432156-ekarout
 cd fly_in
-```
-
-### 2. Create and activate a virtual environment
-
-```bash
-python3 -m venv fly_in
-source fly_in/bin/activate
-
-# Verify you're inside the venv:
-which python
 ```
 
 ### 3. Install dependencies
@@ -79,7 +69,7 @@ make run MAP=<MAP_NAME>
 ### Without Make
 
 ```bash
-python3 main.py <PATH_TO_FILE>
+uv run main.py <PATH_TO_FILE>
 ```
 
 ---
@@ -144,9 +134,39 @@ The project includes a real-time visualization system for debugging and observab
 | ➡️ Edges | Connections rendered between hubs |
 | 🚁 Drones | Moving entities labeled D1, D2, etc. |
 | 🔢 Turn Counter | Current simulation step shown on screen |
-| 🔴 Congestion | Visual feedback on bottlenecks and constraint violations |
 
 The visualizer makes pathfinding behavior observable, helps identify bottlenecks, and provides intuitive insight into multi-agent interactions.
+
+---
+
+## Example input
+
+Text file exemple: map.txt at the root
+
+Run:
+```bash
+python3 main.py map.txt
+```
+
+Expected output:
+```bash
+D1-corridorA D2-hub-roof1 
+D1-tunnelB D2-roof1 D3-corridorA 
+D1-goal D2-roof2 D3-tunnelB D4-corridorA D5-hub-roof1 
+D2-goal D3-goal D4-tunnelB D5-roof1 
+D4-goal D5-roof2 
+D5-goal 
+
+Total turns: 6!
+```
+
+Each line represents a turn, in the format _D\<ID\>-\<zone\>, or D\<ID\>-\<connection\>_
+
+- D\<ID\> refers to the unique drone identifier (e.g., D1, D2).
+- \<zone\> is the name of the destination zone.
+- \<connection\> is the name of the connection toward a restricted zone.
+
+An arcade window will also start, providing a visual graph representation of drone movements on the map.
 
 ---
 
@@ -166,4 +186,4 @@ The visualizer makes pathfinding behavior observable, helps identify bottlenecks
 
 ### AI Usage
 
-AI assistance was used for debugging Python type issues (static typing and mypy errors), structuring documentation, and improving explanations of simulation decisions. All suggestions were reviewed and adapted to match the actual implementation.
+AI assistance was used for debugging Python type issues (static typing and mypy errors), structuring documentation, and explaning visualisation libarry (Arcade). All suggestions were reviewed and adapted to match the actual implementation.

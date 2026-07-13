@@ -1,7 +1,6 @@
 .PHONY: install run debug clean lint lint-strict
 
 PYTHON := python3
-PIP := pip3
 MAIN := main.py
 CONFIG := config.txt
 ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -52,10 +51,10 @@ ARGS = $(CHALLENGER)
 endif
 
 install:
-	$(PIP) install -r requirements.txt
+	uv sync
 
 run:
-	$(PYTHON) $(MAIN) $(ARGS)
+	uv run $(MAIN) $(ARGS)
 
 $(eval $(ARGS):;@:)
 
@@ -67,11 +66,11 @@ clean:
 	rm -rf .mypy_cache .pytest_cache
 
 lint:
-	flake8 . --exclude=fly_in
-	mypy .
+	uv run flake8 . --exclude .venv
+	uv run mypy .
 
 lint-strict:
-	flake8 . --exclude=fly_in
-	mypy . --strict
+	uv run flake8 . --exclude .venv
+	uv run mypy . --strict
 
 .PHONY: install run $(ARGS) debug clean lint lint-strict

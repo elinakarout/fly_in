@@ -7,6 +7,7 @@ import arcade
 
 
 def main() -> None:
+    """Main function to run the program"""
     if len(sys.argv) != 2:
         print("Please specify the path of the text file!")
         return

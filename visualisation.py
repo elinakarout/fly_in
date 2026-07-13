@@ -4,6 +4,9 @@ import math
 
 
 class Drawer(arcade.Window):
+    """
+    Drawer class, inherits from arcade.Window
+    """
     def __init__(self, network: Network) -> None:
         self.network = network
         self.hubs = network.hubs
@@ -45,6 +48,10 @@ class Drawer(arcade.Window):
 
     @staticmethod
     def get_drone_labels(network: Network) -> dict[int, arcade.Text]:
+        """
+        Returns all drone labels Text instances,
+        to be used in the visualisation
+        """
         drone_labels = {}
         for drone in network.drones:
             drone_labels[drone.id] = arcade.Text(
@@ -60,6 +67,9 @@ class Drawer(arcade.Window):
 
     @staticmethod
     def get_rows(network: Network) -> tuple[int, int]:
+        """
+        Get number of rows according to given map
+        """
         y = []
         for hub in network.hubs:
             y.append(hub.coord_y)
@@ -71,6 +81,9 @@ class Drawer(arcade.Window):
 
     @staticmethod
     def get_cols(network: Network) -> tuple[int, int]:
+        """
+        Get number of cols according to given map
+        """
         x = []
         for hub in network.hubs:
             x.append(hub.coord_x)
@@ -81,6 +94,9 @@ class Drawer(arcade.Window):
         return (max(x) + extra, math.floor(extra / 2 + 0.5))
 
     def write_name(self, text: str, x: int, y: int, size: int) -> None:
+        """
+        Draws the name of each hub
+        """
         label = arcade.Text(
             text,
             x,
@@ -93,6 +109,9 @@ class Drawer(arcade.Window):
         label.draw()
 
     def map_coords(self) -> dict[str, tuple[int, int]]:
+        """
+        Get the coordinates of the hubs on the grid
+        """
         coordinates = {}
         for hub in self.hubs:
             x = (hub.coord_x + self.x) * self.cell_size
@@ -101,12 +120,18 @@ class Drawer(arcade.Window):
         return coordinates
 
     def draw_grid(self) -> None:
+        """
+        Draw grid lines
+        """
         for x in range(0, self.width + 1, self.cell_size):
             arcade.draw_line(x, 0, x, self.height, arcade.color.GRAY)
         for y in range(0, self.height + 1, self.cell_size):
             arcade.draw_line(0, y, self.width, y, arcade.color.GRAY)
 
     def draw_hubs(self) -> None:
+        """
+        Draw each hub with its name and color
+        """
         for hub in self.hubs:
             x = (hub.coord_x + self.x) * self.cell_size
             y = (hub.coord_y + self.y) * self.cell_size
@@ -123,6 +148,9 @@ class Drawer(arcade.Window):
             self.write_name(hub.name, x, y, 7)
 
     def draw_connections(self) -> None:
+        """
+        Draws the connecting line between hubs
+        """
         coordinates = self.map_coords()
         for connection in self.connections:
             p1 = coordinates[connection.hubs[0]]
@@ -135,6 +163,10 @@ class Drawer(arcade.Window):
             )
 
     def draw_drones(self) -> None:
+        """
+        Draw each drone and its label, while keeping the location relative
+        to the timer, to be later able to animate them
+        """
         progress = self.turn_timer / self.turn_duration
         for drone in self.network.drones:
             grid_x: float
@@ -173,7 +205,10 @@ class Drawer(arcade.Window):
             label.draw()
 
     def on_update(self, delta_time: float) -> None:
-
+        """
+        Updates the timer for drone animatiom, and adds a
+        turn counter. Automatically calls itself during simulation
+        """
         self.turn_timer += delta_time
         if (
             self.turn_timer >= self.turn_duration
@@ -184,6 +219,9 @@ class Drawer(arcade.Window):
             self.turn_label.text = f"Turn: {self.current_turn}"
 
     def on_draw(self) -> None:
+        """
+        Calls all the drawers
+        """
         self.clear()
         self.draw_grid()
         self.draw_connections()
